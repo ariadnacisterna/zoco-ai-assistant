@@ -9,12 +9,12 @@ class Environment(StrEnum):
 
 class ServiceStatus(StrEnum):
     OK = "ok"
-    DEGRADED = "degraded"
+    ERROR = "error"
 
 
 class DatabaseStatus(StrEnum):
     CONNECTED = "connected"
-    UNAVAILABLE = "unavailable"
+    DISCONNECTED = "disconnected"
 
 
 class KnowledgeStatus(StrEnum):
