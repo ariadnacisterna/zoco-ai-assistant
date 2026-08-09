@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     mongodb_uri: str = Field(...)
     mongodb_database: str = Field(...)
+    mongodb_timeout_ms: PositiveInt = Field(...)
 
     gemini_api_key: SecretStr = Field(...)
     gemini_generation_model: str = Field(...)

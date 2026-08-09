@@ -1,3 +1,6 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,6 +13,21 @@ from app.core.constants import (
     CORS_ALLOWED_HEADERS,
     CORS_ALLOWED_METHODS,
 )
+from app.database.mongodb import MongoDatabase
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    """Manage application startup and shutdown resources."""
+
+    settings = get_settings()
+    mongo_database = MongoDatabase(settings)
+    application.state.mongo_database = mongo_database
+
+    try:
+        yield
+    finally:
+        await mongo_database.close()
 
 
 def create_app() -> FastAPI:
@@ -20,6 +38,7 @@ def create_app() -> FastAPI:
         title=APP_NAME,
         description=APP_DESCRIPTION,
         version=APP_VERSION,
+        lifespan=lifespan,
     )
 
     frontend_origin = str(settings.frontend_origin).rstrip("/")

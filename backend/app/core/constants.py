@@ -9,3 +9,8 @@ CORS_ALLOWED_METHODS: tuple[str, ...] = ("GET", "POST")
 CORS_ALLOWED_HEADERS: tuple[str, ...] = ("Content-Type",)
 
 DOCS_PATH: str = "/docs"
+
+
+MONGODB_PING_COMMAND: str = "ping"
+
+KNOWLEDGE_COLLECTION_NAME: str = "knowledge_chunks"
