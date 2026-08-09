@@ -1,4 +1,4 @@
-from app.core.constants import KNOWLEDGE_COLLECTION_NAME
+from app.core.constants import KNOWLEDGE_COLLECTION_NAME, MONGODB_ID_FIELD
 from app.database.mongodb import MongoDatabase
 
 
@@ -15,5 +15,9 @@ class HealthRepository:
         """Check if the knowledge collection has any documents."""
 
         collection = self._mongo_database.database[KNOWLEDGE_COLLECTION_NAME]
-        document = await collection.find_one()
+        document = await collection.find_one(
+            {},
+            projection=[MONGODB_ID_FIELD],
+        )
+
         return document is not None

@@ -12,5 +12,6 @@ DOCS_PATH: str = "/docs"
 
 
 MONGODB_PING_COMMAND: str = "ping"
+MONGODB_ID_FIELD: str = "_id"
 
 KNOWLEDGE_COLLECTION_NAME: str = "knowledge_chunks"
