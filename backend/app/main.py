@@ -14,6 +14,8 @@ from app.core.constants import (
     CORS_ALLOWED_METHODS,
 )
 from app.database.mongodb import MongoDatabase
+from app.services.knowledge_factory import create_knowledge_service
+from app.services.knowledge_scheduler import KnowledgeScheduler
 
 
 @asynccontextmanager
@@ -22,11 +24,25 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
 
     settings = get_settings()
     mongo_database = MongoDatabase(settings)
+
+    knowledge_service = create_knowledge_service(
+        settings,
+        mongo_database,
+    )
+    knowledge_scheduler = KnowledgeScheduler(
+        knowledge_service,
+        settings.update_interval_hours,
+    )
+
     application.state.mongo_database = mongo_database
+    application.state.knowledge_service = knowledge_service
+
+    knowledge_scheduler.start()
 
     try:
         yield
     finally:
+        await knowledge_scheduler.stop()
         await mongo_database.close()
 
 
