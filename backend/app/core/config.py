@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     zoco_base_url: AnyHttpUrl = Field(...)
     update_interval_hours: PositiveInt = Field(...)
     max_crawl_pages: PositiveInt = Field(...)
+    scraper_timeout_ms: PositiveInt = Field(...)
     chunk_size: PositiveInt = Field(...)
     chunk_overlap: NonNegativeInt = Field(...)
 

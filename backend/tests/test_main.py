@@ -27,7 +27,7 @@ def test_cors_preflight_request() -> None:
         DOCS_PATH,
         headers={
             "Origin": allowed_origin,
-            "Access-Control-Request-Method": HTTPMethod.GET,
+            "Access-Control-Request-Method": HTTPMethod.PUT,
         },
     )
 
