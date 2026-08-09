@@ -11,6 +11,7 @@ from pydantic import (
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.constants import INVALID_CHUNK_CONFIGURATION_MESSAGE
 from app.core.enums import Environment
 
 
@@ -54,7 +55,7 @@ class Settings(BaseSettings):
     def validate_chunk_configuration(self) -> Self:
         """Ensure that chunk overlap is smaller than chunk size."""
         if self.chunk_overlap >= self.chunk_size:
-            raise ValueError("CHUNK_OVERLAP must be lower than CHUNK_SIZE")
+            raise ValueError(INVALID_CHUNK_CONFIGURATION_MESSAGE)
 
         return self
 

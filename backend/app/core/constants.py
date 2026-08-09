@@ -34,4 +34,9 @@ HTML_TEXT_SEPARATOR: str = " "
 SCRAPER_WAIT_UNTIL: str = "domcontentloaded"
 ALLOWED_URL_SCHEMES: tuple[str, ...] = ("http", "https")
 
+INVALID_CHUNK_CONFIGURATION_MESSAGE: str = (
+    "CHUNK_SIZE must be positive and CHUNK_OVERLAP must be non-negative "
+    "and lower than CHUNK_SIZE."
+)
+
 AUTOMATIC_KNOWLEDGE_UPDATE_ERROR_MESSAGE: str = "Automatic knowledge update failed."
