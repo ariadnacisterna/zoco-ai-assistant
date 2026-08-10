@@ -16,6 +16,8 @@ TEST_PAGE_TITLE = "Cobros con ZOCO"
 TEST_PAGE_CONTENT = "Información completa de la página."
 TEST_FIRST_CHUNK = "Primer contenido relevante."
 TEST_SECOND_CHUNK = "Segundo contenido relevante."
+TEST_ZERO_NORM_CHUNK = "Contenido con vector nulo."
+TEST_MISMATCHED_DIMENSION_CHUNK = "Contenido con dimensión incorrecta."
 TEST_QUERY = "¿Cómo puedo cobrar con ZOCO?"
 TEST_SOURCE_URL = "https://zocopagos.com/prueba"
 

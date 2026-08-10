@@ -7,6 +7,7 @@ from google.genai import types
 from app.core.constants import (
     EMBEDDING_DOCUMENT_TEMPLATE,
     EMBEDDING_QUERY_TEMPLATE,
+    EMPTY_RETRIEVAL_QUERY_MESSAGE,
 )
 from app.core.exceptions import EmbeddingGenerationError
 from app.services.embedding_service import EmbeddingService
@@ -85,16 +86,44 @@ def test_embed_query_uses_retrieval_query_format() -> None:
     )
 
 
-def test_embed_query_rejects_invalid_provider_response() -> None:
+def test_embed_query_rejects_empty_query() -> None:
     client = Mock()
-    client.aio.models.embed_content = AsyncMock(
-        return_value=types.EmbedContentResponse(embeddings=[])
-    )
+    client.aio.models.embed_content = AsyncMock()
     service = EmbeddingService(
         client=client,
         model=TEST_EMBEDDING_MODEL,
         dimension=TEST_EMBEDDING_DIMENSION,
     )
 
-    with pytest.raises(EmbeddingGenerationError):
-        asyncio.run(service.embed_query(TEST_QUERY))
+    with pytest.raises(
+        ValueError,
+        match=EMPTY_RETRIEVAL_QUERY_MESSAGE,
+    ):
+        asyncio.run(service.embed_query("  \n  "))
+
+    client.aio.models.embed_content.assert_not_awaited()
+
+
+def test_embed_query_rejects_invalid_provider_response() -> None:
+    invalid_responses = [
+        types.EmbedContentResponse(embeddings=[]),
+        types.EmbedContentResponse(
+            embeddings=[
+                types.ContentEmbedding(
+                    values=TEST_PRIMARY_EMBEDDING[:-1],
+                )
+            ]
+        ),
+    ]
+
+    for invalid_response in invalid_responses:
+        client = Mock()
+        client.aio.models.embed_content = AsyncMock(return_value=invalid_response)
+        service = EmbeddingService(
+            client=client,
+            model=TEST_EMBEDDING_MODEL,
+            dimension=TEST_EMBEDDING_DIMENSION,
+        )
+
+        with pytest.raises(EmbeddingGenerationError):
+            asyncio.run(service.embed_query(TEST_QUERY))

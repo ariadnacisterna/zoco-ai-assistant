@@ -11,15 +11,18 @@ from app.services.semantic_retrieval_service import (
 from tests.constants import (
     EXPECTED_RETRIEVAL_RESULT_COUNT,
     TEST_DUPLICATE_SOURCE_URL,
+    TEST_EMBEDDING_DIMENSION,
     TEST_FIRST_CHUNK,
     TEST_IRRELEVANT_EMBEDDING,
     TEST_MIN_SIMILARITY,
+    TEST_MISMATCHED_DIMENSION_CHUNK,
     TEST_PAGE_TITLE,
     TEST_PRIMARY_EMBEDDING,
     TEST_QUERY,
     TEST_RETRIEVAL_TOP_K,
     TEST_SECOND_CHUNK,
     TEST_SOURCE_URL,
+    TEST_ZERO_NORM_CHUNK,
 )
 
 
@@ -49,6 +52,22 @@ def test_search_returns_most_relevant_chunk() -> None:
             chunk_index=2,
             updated_at=updated_at,
             embedding=TEST_IRRELEVANT_EMBEDDING,
+        ),
+        KnowledgeChunkCreate(
+            source_url=TEST_SOURCE_URL,
+            title=TEST_PAGE_TITLE,
+            content=TEST_ZERO_NORM_CHUNK,
+            chunk_index=3,
+            updated_at=updated_at,
+            embedding=[0.0] * TEST_EMBEDDING_DIMENSION,
+        ),
+        KnowledgeChunkCreate(
+            source_url=TEST_SOURCE_URL,
+            title=TEST_PAGE_TITLE,
+            content=TEST_MISMATCHED_DIMENSION_CHUNK,
+            chunk_index=4,
+            updated_at=updated_at,
+            embedding=[*TEST_PRIMARY_EMBEDDING, 0.0],
         ),
     ]
 

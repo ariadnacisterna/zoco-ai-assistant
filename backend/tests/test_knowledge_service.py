@@ -1,7 +1,10 @@
 import asyncio
 from unittest.mock import AsyncMock, Mock
 
+import pytest
+
 from app.core.enums import ServiceStatus
+from app.core.exceptions import KnowledgeSourceUnavailableError
 from app.repositories.knowledge_repository import KnowledgeRepository
 from app.schemas.knowledge import ScrapedPage
 from app.services.embedding_service import EmbeddingService
@@ -72,3 +75,38 @@ def test_update_knowledge_stores_generated_embeddings() -> None:
 
     assert stored_chunks[0].embedding == TEST_PRIMARY_EMBEDDING
     assert stored_chunks[1].embedding == TEST_SECONDARY_EMBEDDING
+
+
+def test_update_knowledge_without_chunks_skips_embeddings() -> None:
+    scraper_service = Mock(spec=WebScraperService)
+    scraper_service.scrape = AsyncMock(
+        return_value=[
+            ScrapedPage(
+                source_url=TEST_SOURCE_URL,
+                title=TEST_PAGE_TITLE,
+                content=TEST_PAGE_CONTENT,
+            )
+        ]
+    )
+
+    chunking_service = Mock(spec=TextChunkingService)
+    chunking_service.split.return_value = []
+
+    embedding_service = Mock(spec=EmbeddingService)
+    embedding_service.embed_documents = AsyncMock()
+
+    knowledge_repository = Mock(spec=KnowledgeRepository)
+    knowledge_repository.replace_all = AsyncMock()
+
+    service = KnowledgeService(
+        scraper_service=scraper_service,
+        chunking_service=chunking_service,
+        embedding_service=embedding_service,
+        knowledge_repository=knowledge_repository,
+    )
+
+    with pytest.raises(KnowledgeSourceUnavailableError):
+        asyncio.run(service.update_knowledge())
+
+    embedding_service.embed_documents.assert_not_awaited()
+    knowledge_repository.replace_all.assert_not_awaited()
