@@ -2,6 +2,7 @@ import asyncio
 from unittest.mock import AsyncMock, Mock
 
 from app.core.constants import (
+    CHAT_HUMAN_FALLBACK_MARKER,
     CHAT_INSUFFICIENT_CONTEXT_MESSAGE,
     CHAT_PROVIDER_UNAVAILABLE_MESSAGE,
 )
@@ -92,4 +93,24 @@ def test_answer_uses_human_fallback_when_generation_fails() -> None:
 
     assert response.status == ChatStatus.HUMAN_FALLBACK
     assert response.answer == CHAT_PROVIDER_UNAVAILABLE_MESSAGE
+    assert response.sources == []
+
+
+def test_answer_uses_human_fallback_when_model_requests_it() -> None:
+    chunks = [
+        RetrievedKnowledgeChunk(
+            source_url=TEST_SOURCE_URL,
+            title=TEST_PAGE_TITLE,
+            content=TEST_FIRST_CHUNK,
+            chunk_index=0,
+            similarity=TEST_SOURCE_SIMILARITY,
+        )
+    ]
+    service, generation_service = _create_service(chunks)
+    generation_service.generate_answer.return_value = CHAT_HUMAN_FALLBACK_MARKER
+
+    response = asyncio.run(service.answer(TEST_CHAT_MESSAGE))
+
+    assert response.status == ChatStatus.HUMAN_FALLBACK
+    assert response.answer == CHAT_INSUFFICIENT_CONTEXT_MESSAGE
     assert response.sources == []
