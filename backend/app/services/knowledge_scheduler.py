@@ -23,11 +23,11 @@ class KnowledgeScheduler:
         self._interval_seconds = timedelta(hours=interval_hours).total_seconds()
         self._task: asyncio.Task[None] | None = None
 
-    def start(self) -> None:
+    def start(self, update_immediately: bool = True) -> None:
         """Start the automatic update task."""
 
         if self._task is None:
-            self._task = asyncio.create_task(self._run())
+            self._task = asyncio.create_task(self._run(update_immediately))
 
     async def stop(self) -> None:
         """Stop the automatic update task."""
@@ -42,7 +42,10 @@ class KnowledgeScheduler:
 
         self._task = None
 
-    async def _run(self) -> None:
+    async def _run(self, update_immediately: bool) -> None:
+        if not update_immediately:
+            await asyncio.sleep(self._interval_seconds)
+
         while True:
             try:
                 await self._knowledge_service.update_knowledge()

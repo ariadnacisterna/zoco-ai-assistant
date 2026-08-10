@@ -2,12 +2,14 @@ from collections import deque
 from urllib.parse import urldefrag, urljoin, urlparse
 
 from bs4 import BeautifulSoup
-from playwright.async_api import Browser, async_playwright
+from playwright.async_api import Browser, Page, async_playwright
 from playwright.async_api import Error as PlaywrightError
 from pydantic import AnyHttpUrl
 
 from app.core.constants import (
     ALLOWED_URL_SCHEMES,
+    HTML_EXPANDABLE_CONTAINER_SELECTOR,
+    HTML_EXPANDABLE_CONTROL_SELECTOR,
     HTML_IGNORED_SELECTOR,
     HTML_LINK_SELECTOR,
     HTML_MAIN_SELECTOR,
@@ -59,10 +61,16 @@ class WebScraperService:
         pending_urls = deque([self._base_url])
         discovered_urls = {self._base_url}
         visited_urls: set[str] = set()
+        processed_urls: set[str] = set()
+        seen_content_keys: set[str] = set()
         scraped_pages: list[ScrapedPage] = []
 
-        while pending_urls and len(visited_urls) < self._max_pages:
+        while pending_urls and len(processed_urls) < self._max_pages:
             current_url = pending_urls.popleft()
+
+            if current_url in visited_urls:
+                continue
+
             visited_urls.add(current_url)
 
             page = await browser.new_page()
@@ -77,6 +85,17 @@ class WebScraperService:
                 if response is None or not response.ok:
                     continue
 
+                resolved_url = self._normalize_url(page.url)
+
+                if (
+                    not self._is_allowed_url(resolved_url)
+                    or resolved_url in processed_urls
+                ):
+                    continue
+
+                processed_urls.add(resolved_url)
+                discovered_urls.add(resolved_url)
+                expanded_content = await self._collect_expandable_content(page)
                 rendered_html = await page.content()
             except PlaywrightError:
                 continue
@@ -99,19 +118,26 @@ class WebScraperService:
                 )
 
                 if content:
-                    title = (
-                        soup.title.get_text(strip=True)
-                        if soup.title is not None
-                        else current_url
+                    content = HTML_TEXT_SEPARATOR.join(
+                        (content, *expanded_content),
                     )
+                    content_key = self._content_key(content)
 
-                    scraped_pages.append(
-                        ScrapedPage(
-                            source_url=current_url,
-                            title=title,
-                            content=content,
+                    if content_key not in seen_content_keys:
+                        seen_content_keys.add(content_key)
+                        title = (
+                            soup.title.get_text(strip=True)
+                            if soup.title is not None
+                            else resolved_url
                         )
-                    )
+
+                        scraped_pages.append(
+                            ScrapedPage(
+                                source_url=resolved_url,
+                                title=title,
+                                content=content,
+                            )
+                        )
 
             for link in soup.select(HTML_LINK_SELECTOR):
                 href = link.get("href")
@@ -119,7 +145,7 @@ class WebScraperService:
                 if not isinstance(href, str):
                     continue
 
-                candidate_url = self._normalize_url(urljoin(current_url, href))
+                candidate_url = self._normalize_url(urljoin(resolved_url, href))
 
                 if (
                     self._is_allowed_url(candidate_url)
@@ -129,6 +155,40 @@ class WebScraperService:
                     pending_urls.append(candidate_url)
 
         return scraped_pages
+
+    async def _collect_expandable_content(self, page: Page) -> list[str]:
+        controls = page.locator(HTML_EXPANDABLE_CONTROL_SELECTOR)
+        expanded_content: list[str] = []
+
+        for control_index in range(await controls.count()):
+            control = controls.nth(control_index)
+
+            try:
+                was_expanded = await control.get_attribute("aria-expanded") == "true"
+
+                if not was_expanded:
+                    await control.click()
+
+                container = control.locator(HTML_EXPANDABLE_CONTAINER_SELECTOR)
+                content = HTML_TEXT_SEPARATOR.join(
+                    (await container.inner_text()).split()
+                )
+
+                if content:
+                    expanded_content.append(content)
+
+                if not was_expanded:
+                    await control.click()
+            except PlaywrightError:
+                continue
+
+        return expanded_content
+
+    @staticmethod
+    def _content_key(content: str) -> str:
+        return "".join(
+            character for character in content.casefold() if character.isalnum()
+        )
 
     @staticmethod
     def _normalize_url(url: str) -> str:
