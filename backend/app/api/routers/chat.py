@@ -43,7 +43,10 @@ async def answer_chat(
     """Answer a question using verified ZOCO knowledge."""
 
     try:
-        return await chat_service.answer(request.message)
+        return await chat_service.answer(
+            request.message,
+            request.conversation_id,
+        )
     except ChatMessageTooLongError as error:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,

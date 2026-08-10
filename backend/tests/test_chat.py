@@ -12,6 +12,7 @@ from app.services.chat_service import ChatService
 from tests.constants import (
     TEST_CHAT_ANSWER,
     TEST_CHAT_MESSAGE,
+    TEST_CONVERSATION_ID,
     TEST_PAGE_TITLE,
     TEST_SOURCE_SIMILARITY,
     TEST_SOURCE_URL,
@@ -22,6 +23,7 @@ client = TestClient(app)
 
 def test_chat_returns_grounded_answer() -> None:
     expected_response = ChatResponse(
+        conversation_id=TEST_CONVERSATION_ID,
         status=ChatStatus.ANSWERED,
         answer=TEST_CHAT_ANSWER,
         sources=[
@@ -39,10 +41,17 @@ def test_chat_returns_grounded_answer() -> None:
     try:
         response = client.post(
             f"{API_PREFIX}{CHAT_PATH}",
-            json={"message": TEST_CHAT_MESSAGE},
+            json={
+                "message": TEST_CHAT_MESSAGE,
+                "conversation_id": str(TEST_CONVERSATION_ID),
+            },
         )
     finally:
         app.dependency_overrides.clear()
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected_response.model_dump(mode="json")
+    chat_service.answer.assert_awaited_once_with(
+        TEST_CHAT_MESSAGE,
+        TEST_CONVERSATION_ID,
+    )
