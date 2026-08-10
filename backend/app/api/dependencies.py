@@ -5,6 +5,7 @@ from fastapi import Depends, Request
 from app.database.dependencies import get_mongo_database
 from app.database.mongodb import MongoDatabase
 from app.repositories.health_repository import HealthRepository
+from app.services.chat_service import ChatService
 from app.services.health_service import HealthService
 from app.services.knowledge_service import KnowledgeService
 
@@ -26,3 +27,9 @@ def get_knowledge_service(request: Request) -> KnowledgeService:
     """Return the shared knowledge service."""
 
     return request.app.state.knowledge_service
+
+
+def get_chat_service(request: Request) -> ChatService:
+    """Return the shared chat service."""
+
+    return request.app.state.chat_service
