@@ -10,6 +10,11 @@ export const DOM_ID = {
   ERROR_MESSAGE: 'error-popup-message',
 } as const
 
+export const DOM_SELECTOR = {
+  FOCUSABLE_ELEMENT:
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+} as const
+
 export const EXTERNAL_LINK_PROPS = {
   target: '_blank',
   rel: 'noreferrer',

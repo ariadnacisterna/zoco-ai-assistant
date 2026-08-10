@@ -15,7 +15,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
     messagesEndRef.current?.scrollIntoView({
       behavior: SCROLL_BEHAVIOR.NEW_MESSAGE,
     })
-  }, [isLoading, messages])
+  }, [messages.length])
 
   return (
     <section className="messages-panel" aria-live="polite" aria-busy={isLoading}>

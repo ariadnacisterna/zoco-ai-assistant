@@ -37,6 +37,7 @@ export const CHAT_COPY = {
 
 export const KEYBOARD_KEY = {
   ENTER: 'Enter',
+  TAB: 'Tab',
 } as const
 
 export const SCROLL_BEHAVIOR = {
