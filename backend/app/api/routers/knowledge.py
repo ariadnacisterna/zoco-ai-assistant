@@ -6,11 +6,15 @@ from pymongo.errors import PyMongoError
 from app.api.dependencies import get_knowledge_service
 from app.core.constants import (
     DATABASE_UNAVAILABLE_MESSAGE,
+    EMBEDDING_PROVIDER_UNAVAILABLE_MESSAGE,
     KNOWLEDGE_PATH,
     KNOWLEDGE_SOURCE_UNAVAILABLE_MESSAGE,
     KNOWLEDGE_TAG,
 )
-from app.core.exceptions import KnowledgeSourceUnavailableError
+from app.core.exceptions import (
+    EmbeddingGenerationError,
+    KnowledgeSourceUnavailableError,
+)
 from app.schemas.knowledge import KnowledgeUpdateResponse
 from app.services.knowledge_service import KnowledgeService
 
@@ -47,6 +51,11 @@ async def update_knowledge(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=KNOWLEDGE_SOURCE_UNAVAILABLE_MESSAGE,
+        ) from error
+    except EmbeddingGenerationError as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=EMBEDDING_PROVIDER_UNAVAILABLE_MESSAGE,
         ) from error
     except PyMongoError as error:
         raise HTTPException(

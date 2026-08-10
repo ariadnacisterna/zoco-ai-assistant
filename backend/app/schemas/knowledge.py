@@ -1,6 +1,12 @@
 from datetime import datetime
 
-from pydantic import AnyHttpUrl, BaseModel, NonNegativeInt
+from pydantic import (
+    AnyHttpUrl,
+    BaseModel,
+    Field,
+    FiniteFloat,
+    NonNegativeInt,
+)
 
 from app.core.enums import ServiceStatus
 
@@ -21,6 +27,17 @@ class KnowledgeChunkCreate(BaseModel):
     content: str
     chunk_index: NonNegativeInt
     updated_at: datetime
+    embedding: list[FiniteFloat] = Field(min_length=1)
+
+
+class RetrievedKnowledgeChunk(BaseModel):
+    """Knowledge chunk selected by semantic similarity."""
+
+    source_url: AnyHttpUrl
+    title: str
+    content: str
+    chunk_index: NonNegativeInt
+    similarity: FiniteFloat = Field(ge=-1.0, le=1.0)
 
 
 class KnowledgeUpdateResponse(BaseModel):
