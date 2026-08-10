@@ -29,3 +29,9 @@ TEST_RETRIEVAL_TOP_K = 2
 EXPECTED_RETRIEVAL_RESULT_COUNT = 1
 TEST_DUPLICATE_SOURCE_URL = "https://zocopagos.com/pagos"
 TEST_MIN_SIMILARITY = 0.5
+
+TEST_GENERATION_MODEL = "gemini-generation-model"
+TEST_CHAT_MESSAGE = "¿Cómo puedo cobrar con ZOCO?"
+TEST_CHAT_ANSWER = "Podés cobrar con las soluciones de ZOCO."
+TEST_MAX_MESSAGE_LENGTH = 1000
+TEST_SOURCE_SIMILARITY = 0.9

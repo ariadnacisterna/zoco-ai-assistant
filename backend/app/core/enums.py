@@ -21,3 +21,8 @@ class KnowledgeStatus(StrEnum):
     READY = "ready"
     EMPTY = "empty"
     UNAVAILABLE = "unavailable"
+
+
+class ChatStatus(StrEnum):
+    ANSWERED = "answered"
+    HUMAN_FALLBACK = "human_fallback"

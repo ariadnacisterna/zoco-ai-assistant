@@ -17,6 +17,7 @@ from app.core.constants import (
     UVICORN_LOGGER_NAME,
 )
 from app.database.mongodb import MongoDatabase
+from app.services.chat_factory import create_chat_service
 from app.services.knowledge_factory import (
     create_embedding_service,
     create_knowledge_service,
@@ -50,6 +51,10 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         mongo_database,
         embedding_service,
     )
+    chat_service = create_chat_service(
+        settings,
+        semantic_retrieval_service,
+    )
     knowledge_scheduler = KnowledgeScheduler(
         knowledge_service,
         settings.update_interval_hours,
@@ -58,6 +63,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     application.state.mongo_database = mongo_database
     application.state.knowledge_service = knowledge_service
     application.state.semantic_retrieval_service = semantic_retrieval_service
+    application.state.chat_service = chat_service
 
     knowledge_scheduler.start()
 
@@ -65,6 +71,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         yield
     finally:
         await knowledge_scheduler.stop()
+        await chat_service.close()
         await embedding_service.close()
         await mongo_database.close()
 
