@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pymongo.errors import PyMongoError
 
 from app.api.router import api_router
 from app.core.config import get_settings
@@ -17,6 +18,7 @@ from app.core.constants import (
     UVICORN_LOGGER_NAME,
 )
 from app.database.mongodb import MongoDatabase
+from app.repositories.health_repository import HealthRepository
 from app.services.chat_factory import create_chat_service
 from app.services.knowledge_factory import (
     create_embedding_service,
@@ -66,7 +68,12 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     application.state.semantic_retrieval_service = semantic_retrieval_service
     application.state.chat_service = chat_service
 
-    knowledge_scheduler.start()
+    try:
+        has_knowledge = await HealthRepository(mongo_database).has_knowledge()
+    except PyMongoError:
+        has_knowledge = False
+
+    knowledge_scheduler.start(update_immediately=not has_knowledge)
 
     try:
         yield
