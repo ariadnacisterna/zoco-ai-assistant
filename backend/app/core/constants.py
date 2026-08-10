@@ -40,3 +40,41 @@ INVALID_CHUNK_CONFIGURATION_MESSAGE: str = (
 )
 
 AUTOMATIC_KNOWLEDGE_UPDATE_ERROR_MESSAGE: str = "Automatic knowledge update failed."
+
+MONGODB_EMBEDDING_FIELD: str = "embedding"
+
+EMBEDDING_DOCUMENT_TEMPLATE: str = "title: {title} | text: {content}"
+EMBEDDING_QUERY_TEMPLATE: str = "task: search result | query: {query}"
+
+EMPTY_RETRIEVAL_QUERY_MESSAGE: str = "The retrieval query cannot be empty."
+INVALID_EMBEDDING_RESPONSE_MESSAGE: str = (
+    "Gemini returned an invalid embedding response."
+)
+EMBEDDING_PROVIDER_UNAVAILABLE_MESSAGE: str = "The embedding provider is unavailable."
+
+KNOWLEDGE_UPDATE_STARTED_LOG_MESSAGE: str = "Knowledge update started."
+KNOWLEDGE_UPDATE_COMPLETED_LOG_MESSAGE: str = (
+    "Knowledge update completed: pages=%s chunks=%s elapsed_seconds=%.3f."
+)
+EMBEDDING_GENERATION_STARTED_LOG_MESSAGE: str = (
+    "Embedding generation started: items=%s."
+)
+EMBEDDING_GENERATION_COMPLETED_LOG_MESSAGE: str = (
+    "Embedding generation completed: items=%s."
+)
+EMBEDDING_GENERATION_FAILED_LOG_MESSAGE: str = "Gemini embedding generation failed."
+INVALID_EMBEDDING_RESPONSE_LOG_MESSAGE: str = (
+    "Gemini returned %s embeddings; expected %s."
+)
+INVALID_KNOWLEDGE_DOCUMENTS_LOG_MESSAGE: str = (
+    "Ignored invalid knowledge documents: count=%s."
+)
+INVALID_EMBEDDING_VECTOR_LOG_MESSAGE: str = (
+    "Ignored knowledge chunk with an incompatible embedding."
+)
+SEMANTIC_RETRIEVAL_COMPLETED_LOG_MESSAGE: str = (
+    "Semantic retrieval completed: candidates=%s selected=%s best_score=%s."
+)
+
+APPLICATION_LOGGER_NAME: str = "app"
+UVICORN_LOGGER_NAME: str = "uvicorn"

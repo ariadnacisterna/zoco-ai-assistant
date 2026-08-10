@@ -1,4 +1,8 @@
-from app.core.constants import KNOWLEDGE_COLLECTION_NAME, MONGODB_ID_FIELD
+from app.core.constants import (
+    KNOWLEDGE_COLLECTION_NAME,
+    MONGODB_EMBEDDING_FIELD,
+    MONGODB_ID_FIELD,
+)
 from app.database.mongodb import MongoDatabase
 
 
@@ -16,7 +20,12 @@ class HealthRepository:
 
         collection = self._mongo_database.database[KNOWLEDGE_COLLECTION_NAME]
         document = await collection.find_one(
-            {},
+            {
+                MONGODB_EMBEDDING_FIELD: {
+                    "$exists": True,
+                    "$ne": [],
+                }
+            },
             projection=[MONGODB_ID_FIELD],
         )
 

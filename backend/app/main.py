@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -10,11 +11,17 @@ from app.core.constants import (
     APP_DESCRIPTION,
     APP_NAME,
     APP_VERSION,
+    APPLICATION_LOGGER_NAME,
     CORS_ALLOWED_HEADERS,
     CORS_ALLOWED_METHODS,
+    UVICORN_LOGGER_NAME,
 )
 from app.database.mongodb import MongoDatabase
-from app.services.knowledge_factory import create_knowledge_service
+from app.services.knowledge_factory import (
+    create_embedding_service,
+    create_knowledge_service,
+    create_semantic_retrieval_service,
+)
 from app.services.knowledge_scheduler import KnowledgeScheduler
 
 
@@ -22,12 +29,26 @@ from app.services.knowledge_scheduler import KnowledgeScheduler
 async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     """Manage application startup and shutdown resources."""
 
+    application_logger = logging.getLogger(APPLICATION_LOGGER_NAME)
+    uvicorn_logger = logging.getLogger(UVICORN_LOGGER_NAME)
+
+    application_logger.handlers = list(uvicorn_logger.handlers)
+    application_logger.setLevel(logging.INFO)
+    application_logger.propagate = False
+
     settings = get_settings()
     mongo_database = MongoDatabase(settings)
 
+    embedding_service = create_embedding_service(settings)
     knowledge_service = create_knowledge_service(
         settings,
         mongo_database,
+        embedding_service,
+    )
+    semantic_retrieval_service = create_semantic_retrieval_service(
+        settings,
+        mongo_database,
+        embedding_service,
     )
     knowledge_scheduler = KnowledgeScheduler(
         knowledge_service,
@@ -36,6 +57,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
 
     application.state.mongo_database = mongo_database
     application.state.knowledge_service = knowledge_service
+    application.state.semantic_retrieval_service = semantic_retrieval_service
 
     knowledge_scheduler.start()
 
@@ -43,11 +65,13 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         yield
     finally:
         await knowledge_scheduler.stop()
+        await embedding_service.close()
         await mongo_database.close()
 
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
+
     settings = get_settings()
 
     application = FastAPI(
