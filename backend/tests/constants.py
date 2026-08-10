@@ -1,3 +1,6 @@
+from datetime import UTC, datetime
+from uuid import UUID
+
 TEST_CHUNK_SIZE = 10
 TEST_CHUNK_OVERLAP = 2
 TEST_OVERLAPPING_TEXT = "abcdefghijklmnopqrstuvw"
@@ -35,3 +38,10 @@ TEST_CHAT_MESSAGE = "¿Cómo puedo cobrar con ZOCO?"
 TEST_CHAT_ANSWER = "Podés cobrar con las soluciones de ZOCO."
 TEST_MAX_MESSAGE_LENGTH = 1000
 TEST_SOURCE_SIMILARITY = 0.9
+
+TEST_CONVERSATION_ID = UUID("12345678-1234-5678-1234-567812345678")
+TEST_CONVERSATION_CONTEXT_MESSAGES = 6
+TEST_PREVIOUS_USER_MESSAGE = "¿También puedo cobrar con un enlace?"
+TEST_PREVIOUS_ASSISTANT_MESSAGE = "Sí, ZOCO permite generar enlaces de pago."
+TEST_MESSAGE_CREATED_AT = datetime(2026, 1, 1, tzinfo=UTC)
+EXPECTED_CONVERSATION_MESSAGE_COUNT = 2

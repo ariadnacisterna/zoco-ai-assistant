@@ -15,6 +15,7 @@ MONGODB_PING_COMMAND: str = "ping"
 MONGODB_ID_FIELD: str = "_id"
 
 KNOWLEDGE_COLLECTION_NAME: str = "knowledge_chunks"
+CONVERSATION_COLLECTION_NAME: str = "conversation_messages"
 
 KNOWLEDGE_PATH: str = "/knowledge"
 KNOWLEDGE_TAG: str = "knowledge"
@@ -28,6 +29,7 @@ KNOWLEDGE_SOURCE_UNAVAILABLE_MESSAGE: str = (
 DATABASE_UNAVAILABLE_MESSAGE: str = "The database is unavailable."
 
 MONGODB_SOURCE_URL_FIELD: str = "source_url"
+MONGODB_CONVERSATION_ID_FIELD: str = "conversation_id"
 
 HTML_PARSER: str = "html.parser"
 HTML_MAIN_SELECTOR: str = "main"
@@ -79,9 +81,21 @@ CHAT_CONTEXT_ITEM_TEMPLATE: str = (
     "Título: {title}\nFuente: {source_url}\nContenido: {content}"
 )
 CHAT_USER_PROMPT_TEMPLATE: str = (
-    "Pregunta del usuario:\n{question}\n\nContexto recuperado:\n{context}"
+    "Historial conversacional:\n{history}\n\n"
+    "Pregunta del usuario:\n{question}\n\n"
+    "Contexto recuperado:\n{context}"
 )
 CHAT_CONTEXT_SEPARATOR: str = "\n\n---\n\n"
+CHAT_HISTORY_ITEM_TEMPLATE: str = "{role}: {content}"
+CHAT_HISTORY_SEPARATOR: str = "\n"
+CHAT_EMPTY_HISTORY_MESSAGE: str = "No hay mensajes previos."
+CHAT_RETRIEVAL_QUERY_TEMPLATE: str = "{history}\n{message}"
+CHAT_SYSTEM_INSTRUCTION_SEPARATOR: str = " "
+CHAT_CONVERSATION_INSTRUCTION: str = (
+    "El historial conversacional sirve solamente para comprender la continuidad "
+    "del diálogo. No lo uses como fuente de hechos. Fundamentá la respuesta "
+    "únicamente con el contexto recuperado."
+)
 CHAT_GENERATION_TEMPERATURE: float = 0.0
 
 CHAT_FALLBACK_INSUFFICIENT_CONTEXT_REASON: str = "insufficient_context"

@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from pydantic import (
     AnyHttpUrl,
@@ -20,6 +21,7 @@ class ChatRequest(BaseModel):
     """Message sent by the user to the assistant."""
 
     message: NormalizedMessage
+    conversation_id: UUID | None = None
 
 
 class ChatSource(BaseModel):
@@ -33,6 +35,7 @@ class ChatSource(BaseModel):
 class ChatResponse(BaseModel):
     """Grounded answer or an explicit human fallback."""
 
+    conversation_id: UUID
     status: ChatStatus
     answer: str
     sources: list[ChatSource] = Field(default_factory=list)

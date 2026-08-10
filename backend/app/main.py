@@ -53,6 +53,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     )
     chat_service = create_chat_service(
         settings,
+        mongo_database,
         semantic_retrieval_service,
     )
     knowledge_scheduler = KnowledgeScheduler(

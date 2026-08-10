@@ -26,3 +26,8 @@ class KnowledgeStatus(StrEnum):
 class ChatStatus(StrEnum):
     ANSWERED = "answered"
     HUMAN_FALLBACK = "human_fallback"
+
+
+class ConversationRole(StrEnum):
+    USER = "user"
+    ASSISTANT = "assistant"

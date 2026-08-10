@@ -4,15 +4,20 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from google.genai import types
 
+from app.core.enums import ConversationRole
 from app.core.exceptions import AnswerGenerationError
+from app.schemas.conversation import ConversationMessage
 from app.schemas.knowledge import RetrievedKnowledgeChunk
 from app.services.gemini_generation_service import GeminiGenerationService
 from tests.constants import (
     TEST_CHAT_ANSWER,
     TEST_CHAT_MESSAGE,
+    TEST_CONVERSATION_ID,
     TEST_FIRST_CHUNK,
     TEST_GENERATION_MODEL,
+    TEST_MESSAGE_CREATED_AT,
     TEST_PAGE_TITLE,
+    TEST_PREVIOUS_USER_MESSAGE,
     TEST_SOURCE_SIMILARITY,
     TEST_SOURCE_URL,
 )
@@ -44,8 +49,16 @@ def test_generate_answer_uses_question_and_retrieved_context() -> None:
             similarity=TEST_SOURCE_SIMILARITY,
         )
     ]
+    history = [
+        ConversationMessage(
+            conversation_id=TEST_CONVERSATION_ID,
+            role=ConversationRole.USER,
+            content=TEST_PREVIOUS_USER_MESSAGE,
+            created_at=TEST_MESSAGE_CREATED_AT,
+        )
+    ]
 
-    answer = asyncio.run(service.generate_answer(TEST_CHAT_MESSAGE, chunks))
+    answer = asyncio.run(service.generate_answer(TEST_CHAT_MESSAGE, chunks, history))
 
     assert answer == TEST_CHAT_ANSWER
 
@@ -54,6 +67,7 @@ def test_generate_answer_uses_question_and_retrieved_context() -> None:
     assert request["model"] == TEST_GENERATION_MODEL
     assert TEST_CHAT_MESSAGE in request["contents"]
     assert TEST_FIRST_CHUNK in request["contents"]
+    assert TEST_PREVIOUS_USER_MESSAGE in request["contents"]
 
 
 def test_generate_answer_rejects_empty_provider_response() -> None:
@@ -76,4 +90,4 @@ def test_generate_answer_rejects_empty_provider_response() -> None:
     ]
 
     with pytest.raises(AnswerGenerationError):
-        asyncio.run(service.generate_answer(TEST_CHAT_MESSAGE, chunks))
+        asyncio.run(service.generate_answer(TEST_CHAT_MESSAGE, chunks, []))
